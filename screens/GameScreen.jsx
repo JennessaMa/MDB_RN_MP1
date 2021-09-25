@@ -9,6 +9,11 @@ const names = Object.keys(nameToPic);
 
 export default function GameScreen() {
   // TODO: Declare and initialize state variables here, using "useState".
+  const [currNames, setCurrNames] = useState([]);
+  const [correctIndex, setCorrectIndex] = useState(0);
+  const [imagePath, setImagePath] = useState("");
+  const [numTotal, setNumTotal] = useState(0);
+  const [numCorrect, setNumCorrect] = useState(0);
 
   // State for the timer is handled for you.
   const [timeLeft, setTimeLeft] = useState(5000);
@@ -18,9 +23,11 @@ export default function GameScreen() {
     if (timeLeft > 0) {
       // Time still left
       // TODO: update appropriate state variables
+      setTimeLeft(timeLeft - 10);
     } else {
       // Time has expired
       // TODO: update appropriate state variables
+      setNumTotal(numTotal + 1);
     }
   };
 
@@ -44,21 +51,35 @@ export default function GameScreen() {
     nameOptions = shuffle(nameOptions);
 
     // TODO: Update state here.
-
+    setCurrNames(nameOptions);
+    setCorrectIndex(nameOptions.indexOf(correctName));
+    setImagePath(correctImage);
     setTimeLeft(5000);
   };
 
   // Called when user taps a name option.
   // TODO: Update correct # and total # state values.
-  const selectedNameChoice = (index) => {};
+  const selectedNameChoice = (index) => {
+    setNumTotal(numTotal + 1);
+    if (index === correctIndex) {
+      setNumCorrect(numCorrect + 1);
+    }
+  };
 
   useEffect(() => {
     /* TODO: Call the countDown() method every 10 milliseconds */
-  });
+    //https://upmostly.com/tutorials/setinterval-in-react-components-using-hooks
+    const interval = setInterval(() => countDown(), 10);
+    return () => clearInterval(interval);
+   }
+  );
 
   // TODO: Finish this useEffect() hook such that we automatically
   // get the next round when the appropriate state variable changes.
-
+  useEffect(() => {
+      getNextRound();
+    }, [numTotal]
+  );
 
   // Set up four name button components
   const nameButtons = [];
@@ -67,6 +88,13 @@ export default function GameScreen() {
     nameButtons.push(
       // TODO: Implement a Button/Pressable type that shows a name choice, and implement the functionality when a user press on it
       // Hint: Most functionality is already taken care of by one of the functions already defined
+      //<Button style={styles.button} onClick={selectedNameChoice(j) }> {allNames[j]} </Button>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={ () => selectedNameChoice(j)}
+      >
+        <Text style={styles.buttonText}>{currNames[j]}</Text>
+      </TouchableOpacity>
     );
   }
 
@@ -74,11 +102,18 @@ export default function GameScreen() {
 
   // Style & return the view.
   return (
-    <View>
+    <View style={styles.container}>
       {/* TODO: Build out your UI using Text and Image components. */}
       {/* Hint: What does the nameButtons list above hold? 
           What types of objects is this list storing?
           Try to get a sense of what's going on in the for loop above. */}
+          <Text style={styles.scoreText}>Current Score: {numCorrect} / {numTotal}</Text>
+          <Text style={styles.timerText}>Time Remaining: {timeRemainingStr}</Text>
+          <Image source={imagePath} style={styles.image} />
+          {nameButtons[0]}
+          {nameButtons[1]}
+          {nameButtons[2]}
+          {nameButtons[3]}
     </View>
   );
 }
